@@ -1,77 +1,427 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head> 
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dicas de Culinária Prática - Acessível</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Nexus - Portal do Conhecimento Artificial</title>
+    <!-- Biblioteca Three.js via CDN para o fundo 3D -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #030712;
+            --primary-neon: #00f2fe;
+            --purple-neon: #7928ca;
+            --pink-neon: #ff0080;
+            --card-bg: rgba(15, 23, 42, 0.75);
+            --card-border: rgba(0, 242, 254, 0.25);
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        #canvas3d {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* HALL DE ENTRADA PRINCIPAL */
+        #hall-entrada {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .hall-titulo {
+            font-size: 3rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            background: linear-gradient(90deg, var(--primary-neon), var(--pink-neon));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px rgba(0, 242, 254, 0.3);
+        }
+
+        .hall-subtitulo {
+            font-size: 1.2rem;
+            color: var(--text-sub);
+            max-width: 650px;
+            margin-bottom: 50px;
+        }
+
+        .grid-portais {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        .card-portal {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 35px 25px;
+            cursor: pointer;
+            backdrop-filter: blur(12px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: inherit;
+        }
+
+        .card-portal:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: var(--primary-neon);
+            box-shadow: 0 15px 35px rgba(0, 242, 254, 0.25);
+        }
+
+        .icone-portal {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+        }
+
+        .card-portal h2 {
+            font-size: 1.5rem;
+            color: var(--primary-neon);
+            margin-bottom: 12px;
+        }
+
+        .card-portal p {
+            font-size: 0.95rem;
+            color: var(--text-sub);
+        }
+
+        /* SEÇÕES DE DETALHES */
+        .secao-detalhes {
+            display: none;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .header-pagina {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .btn-voltar {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            color: var(--primary-neon);
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-voltar:hover {
+            background: var(--primary-neon);
+            color: #000;
+            box-shadow: 0 0 15px var(--primary-neon);
+        }
+
+        .card-dica {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-left: 5px solid var(--purple-neon);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .card-dica h2 {
+            font-size: 1.6rem;
+            color: var(--primary-neon);
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 8px;
+        }
+
+        .card-dica ul, .card-dica ol {
+            padding-left: 25px;
+            margin: 15px 0;
+        }
+
+        .card-dica li {
+            margin-bottom: 10px;
+            color: #cbd5e1;
+        }
+
+        .destaque {
+            background: rgba(121, 40, 202, 0.2);
+            border-left: 4px solid var(--pink-neon);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 0.95rem;
+        }
+
+        .terminal-box {
+            background: #020617;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 15px;
+            font-family: monospace;
+            color: #38ef7d;
+            margin-top: 15px;
+            min-height: 100px;
+            white-space: pre-line;
+        }
+
+        .input-ia {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            color: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .botao-grande {
+            width: 100%;
+            background: linear-gradient(90deg, var(--purple-neon), var(--pink-neon));
+            color: #fff;
+            border: none;
+            padding: 18px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .botao-grande:hover {
+            box-shadow: 0 0 25px rgba(255, 0, 128, 0.5);
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
 <body>
 
-    <header role="banner">
-        <h1>Culinária Fácil e Segura</h1>
-        <p class="subtitulo">Dicas práticas para facilitar seu dia a dia na cozinha</p>
-    </header>
+    <canvas id="canvas3d"></canvas>
 
-    <main role="main">
-        
-        <!-- Fundo escuro cobrindo a tela (Backdrop) -->
-        <a href="#" class="backdrop" aria-hidden="true"></a>
+    <!-- 1. HALL DE ENTRADA -->
+    <div id="hall-entrada">
+        <h1 class="hall-titulo">NexusIA</h1>
+        <p class="hall-subtitulo">Sintetização e Mapeamento Aprovado do Conhecimento Artificial. Selecione um portal para ver os detalhes.</p>
 
-        <!-- Card 1 -->
-        <section class="card-dica" id="card-1">
-            <a href="#card-1" class="link-card">
-                <h2>1. Organização Sem Esforço (Mise en Place)</h2>
-            </a>
-            <a href="#" class="btn-fechar" title="Fechar modal">&times; Fechar</a>
-            <p>Antes de ligar o fogão, separe todos os ingredientes e utensílios que vai usar sobre a bancada.</p>
+        <div class="grid-portais">
+            <div class="card-portal" onclick="mostrarDetalhes('fundamentos')">
+                <div class="icone-portal">🧠</div>
+                <h2>Fundamentos Cognitivos</h2>
+                <p>Estrutura matemática, redes neurais, peso de conexões e aprendizado autônomo.</p>
+            </div>
+
+            <div class="card-portal" onclick="mostrarDetalhes('arquiteturas')">
+                <div class="icone-portal">⚡</div>
+                <h2>Arquiteturas Generativas</h2>
+                <p>Transformers, LLMs, atenção de contexto e vetores de representação.</p>
+            </div>
+
+            <div class="card-portal" onclick="mostrarDetalhes('consciencia')">
+                <div class="icone-portal">🛡️</div>
+                <h2>Consciência & Ética</h2>
+                <p>Limites da IA, alucinações, mitigações de viés estatístico e segurança.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. DETALHES: FUNDAMENTOS COGNITIVOS -->
+    <div id="detalhes-fundamentos" class="secao-detalhes">
+        <div class="header-pagina">
+            <h1>Fundamentos Cognitivos da IA</h1>
+            <button class="btn-voltar" onclick="voltarAoHall()">⬅ Voltar ao Hall</button>
+        </div>
+
+        <section class="card-dica">
+            <h2>1. Como o Conhecimento se Estrutura em Matrizes 📐</h2>
+            <p>A Inteligência Artificial converte conceitos em vetores numéricos de alta dimensão.</p>
             <ul>
-                <li>Lave e corte os vegetais com antecedência.</li>
-                <li>Utilize potes pequenos para deixar os temperos medidos.</li>
-                <li>Isso evita ter que correr ou se abaixar com o fogo aceso.</li>
+                <li><strong>Normalização de Dados:</strong> Conversão de dados brutos em matrizes matematicamente legíveis.</li>
+                <li><strong>Backpropagation:</strong> Cálculo contínuo de erros para ajuste dos pesos neurais.</li>
+                <li><strong>Camadas Ocultas:</strong> Neurônios artificiais para extração de padrões complexos.</li>
             </ul>
         </section>
 
-        <!-- Card 2 -->
-        <section class="card-dica" id="card-2">
-            <a href="#card-2" class="link-card">
-                <h2>2. Segurança em Primeiro Lugar</h2>
-            </a>
-            <a href="#" class="btn-fechar" title="Fechar modal">&times; Fechar</a>
-            <p>Pequenos cuidados evitam acidentes e tornam o momento do preparo mais relaxante:</p>
+        <section class="card-dica">
+            <h2>2. Os Três Pilares do Aprendizado 🏛️</h2>
             <ol>
-                <li><strong>Cabo da panela:</strong> Vire sempre o cabo das panelas para o lado de dentro do fogão.</li>
-                <li><strong>Tábua firme:</strong> Coloque um pano de prato úmido debaixo da tábua de cortar para ela não escorregar.</li>
-                <li><strong>Iluminação:</strong> Mantenha a bancada de corte sempre muito bem iluminada.</li>
+                <li><strong>Supervisionado:</strong> Aprendizado baseado em dados rotulados.</li>
+                <li><strong>Não-Supervisionado:</strong> Agrupamento automático por padrão oculto.</li>
+                <li><strong>Por Reforço:</strong> Otimização contínua por recompensas.</li>
             </ol>
         </section>
+    </div>
 
-        <!-- Card 3 -->
-        <section class="card-dica" id="card-3">
-            <a href="#card-3" class="link-card">
-                <h2>3. Utensílios Acessíveis</h2>
-            </a>
-            <a href="#" class="btn-fechar" title="Fechar modal">&times; Fechar</a>
-            <p>Substitua ferramentas pesadas ou difíceis de manusear por opções mais confortáveis:</p>
+    <!-- 3. DETALHES: ARQUITETURAS GENERATIVAS -->
+    <div id="detalhes-arquiteturas" class="secao-detalhes">
+        <div class="header-pagina">
+            <h1>Arquiteturas Generativas e LLMs</h1>
+            <button class="btn-voltar" onclick="voltarAoHall()">⬅ Voltar ao Hall</button>
+        </div>
+
+        <section class="card-dica">
+            <h2>1. A Revolução dos Transformers ⚙️</h2>
+            <p>O mecanismo de atenção permitiu processar textos inteiros simultaneamente.</p>
             <ul>
-                <li>Prefira descascadores de legumes com cabo emborrachado e grosso.</li>
-                <li>Use panelas com duas alças laterais para distribuir o peso ao carregar.</li>
-                <li>Dê preferência a potes plásticos leves e com tampas fáceis de abrir.</li>
+                <li><strong>Mecanismo de Atenção:</strong> Medição de relevância relativa entre palavras.</li>
+                <li><strong>Embeddings:</strong> Mapeamento de termos em vetores multidimensionais.</li>
             </ul>
-            <div class="destaque">
-                💡 <strong>Dica de Ouro:</strong> Evite erguer panelas pesadas com água quente; use uma escumadeira para retirar os alimentos prontos.
-            </div>
         </section>
 
-        <button type="button" class="botao-grande" onclick="window.print()">
-            🖨️ Imprimir estas dicas em tamanho grande
-        </button>
+        <section class="card-dica">
+            <h2>Simulador de Tokenização e Atenção 🧪</h2>
+            <p>Digite uma frase para simular o processamento:</p>
+            <input type="text" id="inputToken" class="input-ia" value="A inteligência artificial transforma dados em conhecimento.">
+            <button class="botao-grande" onclick="simularToken()">Simular Processamento</button>
+            <div class="terminal-box" id="outputTerminal">> Aguardando entrada...</div>
+        </section>
+    </div>
 
-    </main>
+    <!-- 4. DETALHES: CONSCIÊNCIA & ÉTICA -->
+    <div id="detalhes-consciencia" class="secao-detalhes">
+        <div class="header-pagina">
+            <h1>Consciência, Alinhamento & Ética</h1>
+            <button class="btn-voltar" onclick="voltarAoHall()">⬅ Voltar ao Hall</button>
+        </div>
 
-    <footer role="contentinfo">
-        <p>Receitas e Dicas Acessíveis — Feito para facilitar sua vida.</p>
-    </footer>
+        <section class="card-dica">
+            <h2>1. Alinhamento e a Caixa Preta 🔮</h2>
+            <p>Garantir comportamento seguro e previsível de modelos avançados.</p>
+            <ul>
+                <li><strong>Alucinações:</strong> Geração de respostas factualmente incorretas.</li>
+                <li><strong>Vieses Estatísticos:</strong> Reprodução involuntária de distorções contidas no treino.</li>
+                <li><strong>RLHF:</strong> Ajuste fino conduzido por feedback humano.</li>
+            </ul>
+        </section>
 
+        <button class="botao-grande" onclick="window.print()">🖨️ Exportar Relatório em PDF</button>
+    </div>
+
+    <script>
+        function mostrarDetalhes(idAssunto) {
+            document.getElementById('hall-entrada').style.display = 'none';
+            const secoes = document.querySelectorAll('.secao-detalhes');
+            secoes.forEach(secao => secao.style.display = 'none');
+
+            const secaoAlvo = document.getElementById('detalhes-' + idAssunto);
+            if (secaoAlvo) {
+                secaoAlvo.style.display = 'block';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function voltarAoHall() {
+            const secoes = document.querySelectorAll('.secao-detalhes');
+            secoes.forEach(secao => secao.style.display = 'none');
+            document.getElementById('hall-entrada').style.display = 'flex';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function simularToken() {
+            const txt = document.getElementById('inputToken').value;
+            const term = document.getElementById('outputTerminal');
+            if (!txt) return;
+
+            term.innerHTML = "> Iniciando vetorização do texto...\n";
+            setTimeout(() => {
+                const tokens = txt.split(' ');
+                term.innerHTML += `> Tokens gerados: [${tokens.map(() => Math.floor(Math.random() * 8999 + 1000)).join(', ')}]\n`;
+            }, 300);
+            setTimeout(() => {
+                term.innerHTML += `> Calculando Matriz de Atenção (Self-Attention)...\n`;
+            }, 700);
+            setTimeout(() => {
+                term.innerHTML += `> Processamento concluído com sucesso!`;
+            }, 1200);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('canvas3d');
+            if (!canvas || typeof THREE === 'undefined') return;
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
+
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.position.z = 30;
+
+            const particleCount = 200;
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+
+            for (let i = 0; i < particleCount * 3; i++) {
+                positions[i] = (Math.random() - 0.5) * 80;
+            }
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const material = new THREE.PointsMaterial({
+                color: 0x00f2fe,
+                size: 0.7,
+                transparent: true,
+                opacity: 0.8
+            });
+
+            const particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+
+            function animate() {
+                requestAnimationFrame(animate);
+                particles.rotation.x += 0.0008;
+                particles.rotation.y += 0.001;
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        });
+    </script>
 </body>
 </html>
